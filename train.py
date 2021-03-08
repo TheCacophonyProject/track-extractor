@@ -44,27 +44,32 @@ from train.search import axis_search
 def load_config():
     parser = argparse.ArgumentParser()
     parser.add_argument("-c", "--config-file", help="Path to config file to use")
+    parser.add_argument("-g", "--grid", action="count", help="Grid Search hparams")
+    parser.add_argument("-w", "--weights", help="Fine tune using these weights")
+
     parser.add_argument(
         "name",
         default="unnammed",
-        help='Name of training job, use "search" for hyper-parameter search',
+        help="Name of training job",
     )
     args = parser.parse_args()
-    return Config.load_from_file(args.config_file), args.name
+    return Config.load_from_file(args.config_file), args
 
 
 def main():
-    conf, job_name = load_config()
+    conf, args = load_config()
 
     init_logging()
     # tf.logging.set_verbosity(3)
 
     os.makedirs(conf.train.train_dir, exist_ok=True)
-
-    if job_name == "search":
-        axis_search(conf)
-    else:
-        train_model(job_name, conf, conf.train.hyper_params)
+    train_model(
+        args.name,
+        conf,
+        conf.train.hyper_params,
+        grid_search=args.grid,
+        weights=args.weights,
+    )
 
 
 if __name__ == "__main__":

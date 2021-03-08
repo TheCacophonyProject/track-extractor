@@ -75,7 +75,7 @@ tracking:
             background_thresh: 20 # 1 degrees
 
             # Minimum raw temperature difference between background and track
-            delta_thresh: 20
+            background_thresh: 20
             # Min/Max temperature threshold value to use if dynamic threshold is true
             max_temp_thresh: null
             min_temp_thresh: null
@@ -85,8 +85,12 @@ tracking:
             track_max_delta: 150
           - camera_model: "lepton3.5"
             temp_thresh: 28000
+<<<<<<< HEAD
+            background_thresh: 100 # 1 degrees
+=======
             background_thresh: 90 # .9 degrees
             delta_thresh: 90 # .9 degrees
+>>>>>>> origin/master
             max_temp_thresh: null
             min_temp_thresh: null
             # discard tracks that do not have enough delta within the window (i.e. pixels that change a lot)

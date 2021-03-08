@@ -41,6 +41,7 @@ class BuildConfig(DefaultConfig):
     segment_spacing = attr.ib()
     previous_split = attr.ib()
     max_segments_per_track = attr.ib()
+    max_frames_per_track = attr.ib()
 
     @classmethod
     def load(cls, build):
@@ -65,6 +66,7 @@ class BuildConfig(DefaultConfig):
             segment_spacing=build["segment_spacing"],
             previous_split=build["previous_split"],
             max_segments_per_track=build["max_segments_per_track"],
+            max_frames_per_track=build["max_frames_per_track"],
         )
 
     @classmethod
@@ -86,6 +88,7 @@ class BuildConfig(DefaultConfig):
             segment_spacing=1,
             previous_split="template.dat",
             max_segments_per_track=None,
+            max_frames_per_track=None,
         )
 
     def validate(self):
@@ -95,7 +98,10 @@ class BuildConfig(DefaultConfig):
 def load_banned_clips_file(filename):
     if not filename or not os.path.exists(filename):
         return None
+    if not os.path.isfile(filename):
+        return None
     files = []
+
     with open(filename) as stream:
         for line in stream:
             files.append(line.strip())

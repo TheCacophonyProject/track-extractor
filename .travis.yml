@@ -14,7 +14,7 @@ before_script:
 - pip install gdown
 
 script:
-- pytest
+- pytest -s
 - ./check-style
 - python3 load.py -r -c tests/test-config.yaml
 - python3 build.py -c tests/test-config.yaml

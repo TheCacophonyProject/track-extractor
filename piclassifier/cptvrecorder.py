@@ -13,7 +13,7 @@ class CPTVRecorder:
         self.location_config = thermal_config.location
         self.device_config = thermal_config.device
         self.output_dir = thermal_config.recorder.output_dir
-        self.motion_config = thermal_config.motion
+        self.motion = thermal_config.motion
         self.preview_secs = thermal_config.recorder.preview_secs
         self.writer = None
         self.filename = None
@@ -59,10 +59,10 @@ class CPTVRecorder:
         self.writer.latitude = self.location_config.latitude
         self.writer.longitude = self.location_config.longitude
         self.writer.preview_secs = self.preview_secs
-        default_thresh = self.motion_config.temp_thresh
-        self.motion_config.temp_thresh = temp_thresh
-        self.writer.motion_config = yaml.dump(self.motion_config).encode()[:255]
-        self.motion_config.temp_thresh = default_thresh
+        default_thresh = self.motion.temp_thresh
+        self.motion.temp_thresh = temp_thresh
+        self.writer.motion = yaml.dump(self.motion).encode()[:255]
+        self.motion.temp_thresh = default_thresh
 
         # add brand model fps etc to cptv when python-cptv supports
 

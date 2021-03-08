@@ -20,8 +20,8 @@ import cv2
 import timezonefinder
 from matplotlib.colors import LinearSegmentedColormap
 import subprocess
-from PIL import ImageFont
-from PIL import ImageDraw
+from PIL import Image, ImageFont, ImageDraw
+from pathlib import Path
 
 EPISON = 1e-5
 
@@ -105,8 +105,8 @@ class Rectangle:
         """ Crops this rectangle so that it fits within given bounds"""
         self.left = max(self.left, bounds.left)
         self.top = max(self.top, bounds.top)
-        self.right = min(self.right, bounds.right)
-        self.bottom = min(self.bottom, bounds.bottom)
+        self.right = max(bounds.left, min(self.right, bounds.right))
+        self.bottom = max(bounds.top, min(self.bottom, bounds.bottom))
 
     def subimage(self, image):
         """Returns a subsection of the original image bounded by this rectangle
@@ -811,3 +811,13 @@ def get_timezone_str(lat, lng):
     if timezone_str is None:
         timezone_str = "Pacific/Auckland"
     return timezone_str
+
+
+def saveclassify_image(data, filename):
+    Path(filename).parent.mkdir(parents=True, exist_ok=True)
+    r = Image.fromarray(np.uint8(data[:, :, 0] * 255))
+    g = Image.fromarray(np.uint8(data[:, :, 1] * 255))
+    b = Image.fromarray(np.uint8(data[:, :, 2] * 255))
+    concat = np.concatenate((r, g, b), axis=1)  # horizontally
+    img = Image.fromarray(np.uint8(concat))
+    img.save(filename + ".png")

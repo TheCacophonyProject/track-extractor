@@ -31,3 +31,13 @@ class DefaultConfig(ABC):
     def validate(self):
         """ The function to get default config. """
         ...
+
+
+def deep_copy_map_if_key_not_exist(from_map, to_map):
+    for key in from_map:
+        if isinstance(from_map[key], dict):
+            if key not in to_map:
+                to_map[key] = {}
+            deep_copy_map_if_key_not_exist(from_map[key], to_map[key])
+        elif key not in to_map:
+            to_map[key] = from_map[key]

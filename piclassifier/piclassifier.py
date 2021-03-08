@@ -60,7 +60,7 @@ class PiClassifier(Processor):
             keep_frames=False,
             calc_stats=False,
         )
-        self.motion_config = thermal_config.motion
+        self.motion = thermal_config.motion
         self.min_frames = thermal_config.recorder.min_secs * headers.fps
         self.max_frames = thermal_config.recorder.max_secs * headers.fps
         self.motion_detector = MotionDetector(

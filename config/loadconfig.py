@@ -50,6 +50,7 @@ class LoadConfig(DefaultConfig):
     preview = attr.ib()
     tag_precedence = attr.ib()
     cache_to_disk = attr.ib()
+    high_quality_optical_flow = attr.ib()
 
     @classmethod
     def load(cls, config):
@@ -59,6 +60,7 @@ class LoadConfig(DefaultConfig):
             preview=config["preview"],
             tag_precedence=LoadConfig.get_tag_precedence(config),
             cache_to_disk=config["cache_to_disk"],
+            high_quality_optical_flow=config["high_quality_optical_flow"],
         )
 
     @classmethod
@@ -69,6 +71,7 @@ class LoadConfig(DefaultConfig):
             preview="tracking",
             tag_precedence=LoadConfig.DEFAULT_GROUPS,
             cache_to_disk=False,
+            high_quality_optical_flow=True,
         )
 
     def get_tag_precedence(config):

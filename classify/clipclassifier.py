@@ -2,12 +2,11 @@ import json
 import logging
 import os.path
 import time
-from typing import Dict
 
 from datetime import datetime
 import numpy as np
 
-from classify.trackprediction import Predictions, TrackPrediction
+from classify.trackprediction import Predictions
 from load.clip import Clip
 from load.cliptrackextractor import ClipTrackExtractor
 from ml_tools import tools
@@ -48,6 +47,7 @@ class ClipClassifier(CPTVFileProcessor):
             self.config.use_opt_flow
             or config.classify.preview == Previewer.PREVIEW_TRACKING,
             self.config.classify.cache_to_disk,
+            high_quality_optical_flow=self.config.tracking.high_quality_optical_flow,
         )
 
     def preprocess(self, frame, thermal_reference):
@@ -147,7 +147,7 @@ class ClipClassifier(CPTVFileProcessor):
             logging.info("classifier loading")
             if self.kerasmodel:
                 model = KerasModel(self.config.train)
-                model.load_weights(self.model_file)
+                model.load_model(self.model_file, training=False)
                 globs._classifier = model
             else:
                 globs._classifier = Model(

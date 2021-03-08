@@ -42,7 +42,7 @@ def main():
         )
 
         motion_detector = MotionDetector(
-            thermal_config, config.tracking.motion_config.dynamic_thresh, None, headers
+            thermal_config, config.tracking.motion.dynamic_thresh, None, headers
         )
         for i, frame in enumerate(reader):
             motion_detector.process_frame(frame)

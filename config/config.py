@@ -10,7 +10,7 @@ from .trainconfig import TrainConfig
 from .classifyconfig import ClassifyConfig
 from .buildconfig import BuildConfig
 from .evaluateconfig import EvaluateConfig
-from .defaultconfig import DefaultConfig
+from .defaultconfig import DefaultConfig, deep_copy_map_if_key_not_exist
 
 CONFIG_FILENAME = "classifier.yaml"
 CONFIG_DIRS = [Path(__file__).parent.parent, Path("/etc/cacophony")]
@@ -57,7 +57,6 @@ class Config(DefaultConfig):
         # "classify_tracking" when not specified.
         deep_copy_map_if_key_not_exist(raw["tracking"], raw["classify_tracking"])
         deep_copy_map_if_key_not_exist(default.as_dict(), raw)
-
         base_folder = raw.get("base_data_folder")
         if base_folder is None:
             raise KeyError("base_data_folder not found in configuration file")
@@ -138,13 +137,3 @@ def parse_options_param(name, value, options):
             )
         )
     return value.lower()
-
-
-def deep_copy_map_if_key_not_exist(from_map, to_map):
-    for key in from_map:
-        if isinstance(from_map[key], dict):
-            if key not in to_map:
-                to_map[key] = {}
-            deep_copy_map_if_key_not_exist(from_map[key], to_map[key])
-        elif key not in to_map:
-            to_map[key] = from_map[key]

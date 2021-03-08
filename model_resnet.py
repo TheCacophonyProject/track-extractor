@@ -136,6 +136,7 @@ class ResnetModel(ConvModel):
 
         self.params.update(ModelCRNN_LQ.DEFAULT_PARAMS)
         self.params.update(train_config.hyper_params)
+        self.params.update(train_config.resnet_params)
 
         self._build_model()
 

@@ -1,0 +1,417 @@
+TestConfig
+recording_tests:
+- !TestRecording
+  device: Wallaby
+  device_id: 956
+  filename: /home/gp/cacophony/classifier-pipeline/test_clips/551732.cptv
+  group: ORC
+  group_id: 160
+  rec_id: 551732
+  tracks:
+  - !TestTrack
+    confidence: 0.85
+    end: 43.22
+    end_pos:
+    - 43.11
+    - - 78
+      - 37
+      - 87
+      - 45
+    expected: true
+    opt_end: 43.22
+    opt_start: 0.0
+    start: 0.0
+    start_pos:
+    - 0.0
+    - - 75
+      - 36
+      - 85
+      - 46
+    tag: bird
+  - !TestTrack
+    confidence: 0.85
+    end: 43.22
+    end_pos:
+    - 43.11
+    - - 34
+      - 53
+      - 44
+      - 63
+    expected: true
+    opt_end: 43.22
+    opt_start: 8.11
+    start: 8.11
+    start_pos:
+    - 8.11
+    - - 10
+      - 30
+      - 19
+      - 38
+    tag: bird
+  - !TestTrack
+    confidence: 0.85
+    end: 20.67
+    end_pos:
+    - 20.56
+    - - 123
+      - 27
+      - 129
+      - 33
+    expected: true
+    opt_end: 20.67
+    opt_start: 3.0
+    start: 0
+    start_pos:
+    - 0
+    - - 4
+      - 91
+      - 14
+      - 101
+    tag: bird
+
+    !TestConfig
+  - !TestRecording
+    device: Wallaby
+    device_id: 956
+    filename: /home/gp/cacophony/classifier-pipeline/test_clips/666638.cptv
+    group: ORC
+    group_id: 160
+    rec_id: 666638
+    tracks:
+    - !TestTrack
+      confidence: 0.8
+      end: 14.44
+      end_pos:
+      - 14.33
+      - - 10
+        - 37
+        - 30
+        - 46
+      expected: false
+      opt_end: 14.44
+      opt_start: 4
+      start: 4
+      start_pos:
+      - 4.11
+      - - 1
+        - 32
+        - 7
+        - 42
+      tag: bird
+    - !TestTrack
+      confidence: 0.8
+      end: 14.44
+      end_pos:
+      - 14.33
+      - - 6
+        - 47
+        - 41
+        - 70
+      expected: true
+      opt_end: 14.44
+      opt_start: 3.11
+      start: 3.11
+      start_pos:
+      - 3.11
+      - - 1
+        - 42
+        - 7
+        - 54
+      tag: bird
+    - !TestTrack
+      confidence: 0.8
+      end: 14.44
+      end_pos:
+      - 14.33
+      - - 83
+        - 25
+        - 97
+        - 40
+      expected: true
+      opt_end: 14.44
+      opt_start: 3
+      start: 3
+      start_pos:
+      - 3
+      - - 150
+        - 35
+        - 159
+        - 50
+      tag: wallaby
+      track_id: 285876
+- !TestRecording
+  device: ruru19w44a
+  device_id: 810
+  filename: /home/gp/cacophony/classifier-pipeline/test_clips/533132.cptv
+  group: BSF1034CoveRd
+  group_id: 137
+  rec_id: 533132
+  tracks:
+  - !TestTrack
+    confidence: 0.85
+    end: 31
+    end_pos:
+    - 30.89
+    - - 41
+      - 49
+      - 54
+      - 61
+    expected: true
+    opt_end: 31
+    opt_start: 0.89
+    start: 0.89
+    start_pos:
+    - 0.89
+    - - 11
+      - 59
+      - 23
+      - 71
+    tag: bird
+
+- !TestRecording
+  device: A_S4_C3
+  device_id: 1269
+  filename: /home/zaza/TheCacophonyProject/classifier-pipeline/smoketest/test-clips/684073.cptv
+  group: LS_2020_09
+  group_id: 191
+  rec_id: 684073
+  tracks:
+  - !TestTrack
+    confidence: 0.8
+    end: 13.89
+    end_pos:
+    - 13.78
+    - [21, 81, 34, 95]
+    expected: true
+    opt_end: 13.89
+    opt_start: 0
+    start: 0
+    start_pos:
+    - 0
+    - [17, 77, 32, 90]
+    tag: part
+    track_id: 298162
+  - !TestTrack
+    confidence: 0.85
+    end: 23.89
+    end_pos:
+    - 23.78
+    - [23, 89, 32, 98]
+    expected: true
+    opt_end: 23.89
+    opt_start: 0
+    start: 0
+    start_pos:
+    - 0
+    - [72, 80, 83, 91]
+    tag: possum
+    track_id: 298161
+  - !TestTrack
+    confidence: 0.85
+    end: 107.22
+    end_pos:
+    - 107.11
+    - [12, 110, 28, 119]
+    expected: true
+    opt_end: 107.22
+    opt_start: 3.33
+    start: 3.33
+    start_pos:
+    - 3.33
+    - [2, 51, 19, 75]
+    tag: possum
+    track_id: 298160
+- !TestRecording
+  device: A_S4_C3
+  device_id: 1269
+  filename: /home/zaza/TheCacophonyProject/classifier-pipeline/smoketest/test-clips/684073.cptv
+  group: LS_2020_09
+  group_id: 191
+  rec_id: 684073
+  tracks:
+  - !TestTrack
+    confidence: 0.85
+    end: 107.2
+    end_pos:
+    - 23.78
+    - [10, 107, 40, 119]
+    expected: true
+    opt_end: 92
+    opt_start: 0
+    start: 0
+    start_pos:
+    - 0
+    - [5, 52, 82, 98]
+    tag: possum
+    track_id: 298161
+- !TestRecording
+  device: Wallaby
+  device_id: 956
+  filename: /home/zaza/TheCacophonyProject/classifier-pipeline/smoketest/test-clips/566285.cptv
+  group: ORC
+  group_id: 160
+  rec_id: 566285
+  tracks:
+  - !TestTrack
+    confidence: 0.8
+    end: 13.22
+    end_pos:
+    - 13.11
+    - [69, 64,116, 114]
+    expected: true
+    opt_end: 13.22
+    opt_start: 6.89
+    start: 0.0
+    start_pos:
+    - 0.0
+    - [91, 80, 147, 119]
+    tag: wallaby
+    track_id: 246853
+  - !TestTrack
+    confidence: 0.8
+    end: 13.22
+    end_pos:
+    - 13.11
+    - [52, 18, 68, 32]
+    expected: true
+    opt_end: 13.22
+    opt_start: 0
+    start: 0
+    start_pos:
+    - 0
+    - [43, 20, 58, 32]
+    tag: wallaby
+    track_id: 246851
+- !TestRecording
+  device: Hubble 1
+  device_id: 757
+  filename: /home/zaza/TheCacophonyProject/classifier-pipeline/smoketest/test-clips/504300.cptv
+  group: akaroa01
+  group_id: 18
+  rec_id: 504300
+  tracks:
+  - !TestTrack
+    confidence: 0.83
+    end: 7.56
+    end_pos:
+    - 7.44
+    - [1, 30, 8, 44]
+    expected: true
+    opt_end: 7.56
+    opt_start: 1
+    start: 1
+    start_pos:
+    - 1
+    - [1, 67, 15, 83]
+    tag: bird
+    track_id: 226116
+    tag: bird
+- !TestRecording
+  device: ruru19w44a
+  device_id: 810
+  filename: /home/zaza/TheCacophonyProject/classifier-pipeline/smoketest/test-clips/504279.cptv
+  group: BSF1034CoveRd
+  group_id: 137
+  rec_id: 504279
+  tracks:
+  - !TestTrack
+    confidence: 0.85
+    end: 28.33
+    end_pos:
+    - 28.22
+    - [1, 110, 7, 119]
+    expected: true
+    opt_end: 28.33
+    opt_start: 14.22
+    start: 14.22
+    start_pos:
+    - 14.22
+    - [41, 113, 56, 119]
+    tag: rodent
+    track_id: 226114
+  - !TestTrack
+    confidence: 0.85
+    end: 12
+    end_pos:
+    - 11.89
+    - [86, 111, 99, 119]
+    expected: true
+    opt_end: 12
+    opt_start: 0.11
+    start: 0.11
+    start_pos:
+    - 0.11
+    - [153, 66, 159, 78]
+    tag: rodent
+    track_id: 226113
+- !TestRecording
+  device: Hubble 1
+  device_id: 757
+  filename: /home/zaza/TheCacophonyProject/classifier-pipeline/smoketest/test-clips/504244.cptv
+  group: akaroa01
+  group_id: 18
+  rec_id: 504244
+  tracks: []
+- !TestRecording
+  device: davidblake03
+  device_id: 1261
+  filename: /home/zaza/TheCacophonyProject/classifier-pipeline/smoketest/test-clips/705159.cptv
+  group: davidblake
+  group_id: 26
+  rec_id: 705159
+  tracks: []
+- !TestRecording
+  device: ruru19w44a
+  device_id: 810
+  filename: /home/zaza/TheCacophonyProject/classifier-pipeline/smoketest/test-clips/544034.cptv
+  group: BSF1034CoveRd
+  group_id: 137
+  rec_id: 544034
+  tracks:
+  - !TestTrack
+    confidence: 0.85
+    end: 20.11
+    end_pos:
+    - 20
+    - [151, 33, 159, 48]
+    expected: true
+    opt_end: 20.11
+    opt_start: 0.33
+    start: 0.33
+    start_pos:
+    - 0.33
+    - [110, 35, 120, 45]
+    tag: unknown
+    track_id: 237805
+- !TestRecording
+  device: TrapCam03
+  device_id: 1193
+  filename: /home/zaza/TheCacophonyProject/classifier-pipeline/smoketest/test-clips/704591.cptv
+  group: livingsprings
+  group_id: 22
+  rec_id: 704591
+  tracks:
+  - !TestTrack
+    confidence: 0.85
+    end: 6.78
+    end_pos:
+    - 6.67
+    - [70, 99, 87, 115]
+    expected: true
+    opt_end: 6.78
+    opt_start: 3
+    start: 3
+    start_pos:
+    - 3
+    - [71, 110, 88, 119]
+    tag: bird
+    track_id: 310289
+- !TestRecording
+  device: Hubble 5
+  device_id: 762
+  filename: /home/zaza/TheCacophonyProject/classifier-pipeline/smoketest/test-clips/506821.cptv
+  group: akaroa01
+  group_id: 18
+  rec_id: 506821
+  tracks: []
+server: https://api.cacophony.org.nz

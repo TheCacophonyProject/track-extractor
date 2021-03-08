@@ -55,13 +55,15 @@ class TrackPrediction:
         self.state = None
         self.track_id = track_id
         self.predictions = []
+        self.novelties = []
         self.fp_index = fp_index
         self.smoothed_predictions = []
         self.smoothed_novelties = []
         self.uniform_prior = False
         self.class_best_score = None
-        self.track_prediction = None
+        self.start_frame = start_frame
 
+        self.track_prediction = None
         self.last_frame_classified = start_frame
         self.num_frames_classified = 0
         self.keep_all = keep_all
@@ -80,21 +82,29 @@ class TrackPrediction:
         self.max_novelty = float(max(self.smoothed_novelties))
         self.novelty_sum = sum(self.smoothed_novelties)
 
-    def classified_frame(self, frame_number, prediction, mass_scale=1, novelty=None):
+    def classified_frame(
+        self, frame_number, prediction, mass_scale=1, novelty=None, smooth=True
+    ):
         self.last_frame_classified = frame_number
         self.num_frames_classified += 1
+
         if novelty:
             self.max_novelty = float(max(self.max_novelty, novelty))
             self.novelty_sum += novelty
-        smoothed_prediction, smoothed_novelty = self.smooth_prediction(
-            prediction, mass_scale=mass_scale, novelty=novelty
-        )
-        if self.keep_all:
-            self.predictions.append(prediction)
+        if smooth:
+            smoothed_prediction, smoothed_novelty = self.smooth_prediction(
+                prediction, mass_scale=mass_scale, novelty=novelty
+            )
+
             self.smoothed_predictions.append(smoothed_prediction)
             self.smoothed_novelties.append(smoothed_novelty)
+
+        if self.keep_all:
+            self.predictions.append(prediction)
+            self.novelties.append(novelty)
         else:
             self.predictions = [prediction]
+            self.novelties = [novelty]
             self.smoothed_predictions = [smoothed_prediction]
             self.smoothed_novelties = [smoothed_novelty]
 
@@ -195,7 +205,6 @@ class TrackPrediction:
         score = self.max_score
         if score is None:
             return None
-
         if score > 0.5:
             first_guess = "{} {:.1f} (clarity {:.1f})".format(
                 labels[self.best_label_index], score * 10, self.clarity * 10
@@ -250,11 +259,16 @@ class TrackPrediction:
         """ average novelty for this track """
         return float(self.novelty_sum / self.num_frames_classified)
 
+    def clarity_at(self, frame):
+        pred = self.predictions[frame]
+        best = np.argsort(pred)
+        return pred[best[-1]] - pred[best[-2]]
+
     @property
     def clarity(self):
         """ The distance between our highest scoring class and second highest scoring class. """
         if self.class_best_score is None or len(self.class_best_score) < 2:
-            return None
+            return 0
         return self.max_score - self.score(2)
 
     def label_index(self, n=None):
@@ -274,14 +288,14 @@ class TrackPrediction:
             return None
         return float(sorted(self.class_best_score)[-n])
 
-    def label_at_time(self, frame_number, n=-1):
+    def label_at_time(self, frame_number, n=1):
         """ class label of nth best guess at a point in time."""
 
         if n is None:
             return None
         return int(np.argsort(self.smoothed_predictions[frame_number])[-n])
 
-    def score_at_time(self, frame_number, n=-1):
+    def score_at_time(self, frame_number, n=1):
         """ class label of nth best guess at a point in time."""
         if n is None:
             return None
@@ -293,6 +307,26 @@ class TrackPrediction:
                 self.track_id, self.get_classified_footer(labels)
             )
         )
+
+    def best_gap(self, above=0.7):
+        # frame and diff
+        best = (0, 0)
+        for i, frame in enumerate(self.predictions):
+            a = np.argsort(frame)
+            if frame[a[-1]] > above:
+                gap = frame[a[-1]] - frame[a[-2]]
+                if gap > best[1]:
+                    best = [i, gap]
+        return best
+
+    def best_frame(self, label=None):
+        preds = self.predictions
+        if label:
+            preds = np.array(preds)[:, label]
+
+        max = np.amax(preds)
+        result = np.where(preds == max)
+        return max, result
 
     def guesses(self, labels):
         guesses = [

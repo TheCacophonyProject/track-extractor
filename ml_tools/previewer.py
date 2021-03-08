@@ -30,6 +30,7 @@ import ml_tools.globals as globs
 from ml_tools.mpeg_creator import MPEGCreator
 from track.region import Region
 from track.track import TrackChannels
+from ml_tools.imageprocessing import normalize
 
 
 class Previewer:
@@ -123,6 +124,7 @@ class Previewer:
             clip.stats.min_temp = np.amin(thermals)
             clip.stats.max_temp = np.amax(thermals)
         mpeg = MPEGCreator(filename)
+        self.frame_scale = 4.0
         for frame_number, frame in enumerate(clip.frame_buffer):
             if self.preview_type == self.PREVIEW_RAW:
                 image = self.convert_and_resize(
@@ -131,21 +133,16 @@ class Previewer:
                 draw = ImageDraw.Draw(image)
             elif self.preview_type == self.PREVIEW_TRACKING:
                 image = self.create_four_tracking_image(
-                    frame, clip.stats.min_temp, clip.stats.max_temp
-                )
-                image = self.convert_and_resize(
-                    image,
+                    frame,
                     clip.stats.min_temp,
                     clip.stats.max_temp,
-                    3.0,
-                    mode=Image.NEAREST,
                 )
                 draw = ImageDraw.Draw(image)
                 self.add_tracks(draw, clip.tracks, frame_number, predictions)
 
             elif self.preview_type == self.PREVIEW_BOXES:
                 image = self.convert_and_resize(
-                    frame.thermal, clip.stats.min_temp, clip.stats.max_temp, 4.0
+                    frame.thermal, clip.stats.min_temp, clip.stats.max_temp
                 )
                 draw = ImageDraw.Draw(image)
                 screen_bounds = Region(0, 0, image.width, image.height)
@@ -155,7 +152,7 @@ class Previewer:
 
             elif self.preview_type == self.PREVIEW_CLASSIFIED:
                 image = self.convert_and_resize(
-                    frame.thermal, clip.stats.min_temp, clip.stats.max_temp, 4.0
+                    frame.thermal, clip.stats.min_temp, clip.stats.max_temp
                 )
                 draw = ImageDraw.Draw(image)
                 screen_bounds = Region(0, 0, image.width, image.height)
@@ -190,7 +187,10 @@ class Previewer:
                 frame = clip.frame_buffer.get_frame(region.frame_number)
                 frame = track.crop_by_region(frame, region)
                 img = tools.convert_heat_to_img(
-                    frame[TrackChannels.thermal], self.colourmap, 0, 350
+                    frame[TrackChannels.thermal],
+                    self.colourmap,
+                    np.amin(frame),
+                    np.amax(frame),
                 )
                 img = img.resize((frame_width, frame_height), Image.NEAREST)
                 video_frames.append(np.asarray(img))
@@ -198,25 +198,25 @@ class Previewer:
             logging.info("creating preview %s", filename_format.format(id + 1))
             tools.write_mpeg(filename_format.format(id + 1), video_frames)
 
-    def convert_and_resize(self, frame, h_min, h_max, size=None, mode=Image.BILINEAR):
+    def convert_and_resize(self, frame, h_min, h_max, mode=Image.BILINEAR):
         """ Converts the image to colour using colour map and resize """
         thermal = frame[:120, :160].copy()
         image = tools.convert_heat_to_img(frame, self.colourmap, h_min, h_max)
-        if size:
-            self.frame_scale = size
-            image = image.resize(
-                (
-                    int(image.width * self.frame_scale),
-                    int(image.height * self.frame_scale),
-                ),
-                mode,
-            )
+        image = image.resize(
+            (
+                int(image.width * self.frame_scale),
+                int(image.height * self.frame_scale),
+            ),
+            mode,
+        )
 
         if self.debug:
             tools.add_heat_number(image, thermal, self.frame_scale)
         return image
 
     def create_track_descriptions(self, clip, predictions):
+        if predictions is None:
+            return
         # look for any tracks that occur on this frame
         for track in clip.tracks:
             guesses = predictions.guesses_for(track.get_id())
@@ -431,25 +431,48 @@ class Previewer:
                     draw, track, region, screen_bounds, text=text, v_offset=v_offset
                 )
 
-    @staticmethod
-    def create_four_tracking_image(frame, min_temp, max_temp):
+    def create_four_tracking_image(self, frame, min_temp, max_temp):
 
         thermal = frame.thermal
         filtered = frame.filtered + min_temp
-        mask = frame.mask.copy()
-        mask[mask > 0] = max_temp
+        filtered = tools.convert_heat_to_img(
+            filtered, self.colourmap, min_temp, max_temp
+        )
+        thermal = tools.convert_heat_to_img(thermal, self.colourmap, min_temp, max_temp)
+        if self.debug:
+            tools.add_heat_number(thermal, frame.thermal, 1)
+        mask, _ = normalize(frame.mask, new_max=255)
+        mask = np.uint8(mask)
+
+        mask = mask[..., np.newaxis]
+        mask = np.repeat(mask, 3, axis=2)
+
+        mask = Image.fromarray(mask)
         flow_h, flow_v = frame.get_flow_split(clip_flow=True)
         if flow_h is None and flow_v is None:
-            flow_magnitude = filtered
+            flow_magnitude = None
         else:
             flow_magnitude = (
                 np.linalg.norm(np.float32([flow_h, flow_v]), ord=2, axis=0) / 4.0
                 + min_temp
             )
+            flow_magnitude = tools.convert_heat_to_img(
+                flow_magnitude, self.colourmap, min_temp, max_temp
+            )
 
-        return np.hstack(
+        image = np.hstack(
             (np.vstack((thermal, mask)), np.vstack((filtered, flow_magnitude)))
         )
+        image = Image.fromarray(image)
+
+        image = image.resize(
+            (
+                int(image.width * self.frame_scale),
+                int(image.height * self.frame_scale),
+            ),
+            Image.BILINEAR,
+        )
+        return image
 
     @staticmethod
     def stats_footer(stats):

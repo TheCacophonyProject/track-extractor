@@ -47,6 +47,7 @@ class Clip:
         self._id = Clip.CLIP_ID
         Clip.CLIP_ID += 1
         Track._track_id = 1
+        self.tags = None
         self.disable_background_subtraction = False
         self.frame_on = 0
         self.ffc_affected = False
@@ -86,7 +87,7 @@ class Clip:
 
     def set_model(self, camera_model):
         self.camera_model = camera_model
-        threshold = self.config.motion_config.threshold_for_model(camera_model)
+        threshold = self.config.motion.threshold_for_model(camera_model)
         if threshold:
             self.threshold_config = threshold
             self.set_motion_thresholds(threshold)
@@ -155,7 +156,6 @@ class Clip:
             ffc_affected = is_affected_by_ffc(frame)
             if ffc_affected:
                 continue
-
             frames.append(frame.pix)
             if len(frames) == 9:
                 frame_average = np.average(frames, axis=0)
@@ -177,7 +177,6 @@ class Clip:
             if initial_frames is None:
                 initial_frames = frame_average
         frames = []
-
         np.clip(initial_diff, 0, None, out=initial_diff)
         initial_frames = self.remove_background_animals(initial_frames, initial_diff)
 
@@ -215,10 +214,8 @@ class Clip:
             sub_components, sub_connected, sub_stats = detect_objects(
                 norm_back, otsus=True
             )
-
-            if sub_components == 0:
+            if len(sub_stats) <= 1:
                 continue
-
             overlap_image = region.subimage(lower_mask) * 255
             overlap_pixels = np.sum(sub_connected[overlap_image > 0])
             overlap_pixels = overlap_pixels / float(component[4])
@@ -258,7 +255,7 @@ class Clip:
         return str(self._id)
 
     def set_temp_thresh(self):
-        if self.config.motion_config.dynamic_thresh:
+        if self.config.motion.dynamic_thresh:
             min_temp = self.threshold_config.min_temp_thresh
             max_temp = self.threshold_config.max_temp_thresh
             if max_temp:
@@ -269,7 +266,7 @@ class Clip:
                 self.temp_thresh = max(min_temp, self.temp_thresh)
             self.stats.temp_thresh = self.temp_thresh
         else:
-            self.temp_thresh = self.config.motion_config.temp_thresh
+            self.temp_thresh = self.config.motion.temp_thresh
 
     def set_video_stats(self, video_start_time):
         """
@@ -284,6 +281,8 @@ class Clip:
     def load_metadata(self, metadata, include_filtered_channel, tag_precedence):
         self._id = metadata["id"]
         device_meta = metadata.get("Device")
+        self.tags = metadata.get("Tags")
+
         if device_meta:
             self.device = device_meta.get("devicename")
         else:

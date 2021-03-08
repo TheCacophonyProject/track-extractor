@@ -1,7 +1,7 @@
-tensorflow==2.1.0
+tensorflow~=2.1.0
 matplotlib~=3.0
 pytz
-cptv~=1.4.0
+cptv~=1.5.0
 opencv-python~=3.4
 numpy~=1.18.5
 scipy==1.4.1

@@ -33,6 +33,20 @@ class TrainConfig(DefaultConfig):
     resnet_params = attr.ib()
     use_gru = attr.ib()
     model = attr.ib()
+    label_probabilities = attr.ib()
+
+    LABEL_PROBABILITIES = {
+        "bird": 20,
+        "possum": 20,
+        "rodent": 20,
+        "hedgehog": 20,
+        "cat": 5,
+        "insect": 1,
+        "leporidae": 5,
+        "mustelid": 5,
+        "false-positive": 1,
+        "wallaby": 5,
+    }
 
     @classmethod
     def load(cls, raw, base_data_folder):
@@ -46,33 +60,19 @@ class TrainConfig(DefaultConfig):
             epochs=raw["epochs"],
             use_gru=raw["use_gru"],
             model=raw["model"],
+            label_probabilities=raw["label_probabilities"],
         )
 
     @classmethod
     def get_defaults(cls):
         return cls(
-            hyper_params={
-                "batch_size": 16,
-                "learning_rate": 0.0004,
-                "learning_rate_decay": 1.0,
-                "l2_reg": 0,
-                "label_smoothing": 0.1,
-                "keep_prob": 0.2,
-                "batch_norm": True,
-                "lstm_units": 256,
-                "enable_flow": True,
-                "augmentation": True,
-                "thermal_threshold": 10,
-                "scale_frequency": 0.5,
-                "gru_units": 256,
-                "hq": False,
-                "use_mask": False,
-            },
+            hyper_params={},
             resnet_params=None,
             train_dir="train",
             epochs=30,
             use_gru=True,
-            model="Resnet",
+            model="keras",
+            label_probabilities=TrainConfig.LABEL_PROBABILITIES,
         )
 
     def validate(self):
