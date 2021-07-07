@@ -81,6 +81,8 @@ class ModelConfig:
     id = attr.ib()
     name = attr.ib()
     model_file = attr.ib()
+    model_weights = attr.ib()
+
     wallaby = attr.ib()
     tag_scores = attr.ib()
     ignored_tags = attr.ib()
@@ -91,6 +93,7 @@ class ModelConfig:
             id=raw["id"],
             name=raw["name"],
             model_file=raw["model_file"],
+            model_weights=raw.get("model_weights"),
             wallaby=raw.get("wallaby", False),
             tag_scores=load_scores(raw.get("tag_scores", {})),
             ignored_tags=raw.get("ignored_tags", []),

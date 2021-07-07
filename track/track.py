@@ -34,6 +34,7 @@ class TrackChannels:
     flow_h = 2
     flow_v = 3
     mask = 4
+    flow = 5
 
 
 class Track:

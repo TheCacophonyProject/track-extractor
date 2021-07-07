@@ -18,6 +18,7 @@ from dateutil.parser import parse as parse_date
 from multiprocessing import Lock
 import numpy as np
 from track.framebuffer import Frame
+from track.region import Region
 
 special_datasets = ["background_frame", "predictions", "overlay"]
 
@@ -305,7 +306,7 @@ class TrackDatabase:
         with HDF5Manager(self.database) as f:
             clips = f["clips"]
             track_node = clips[str(clip_id)][str(track_number)]
-
+            bounds = track_node.attrs["bounds_history"]
             if start_frame is None:
                 start_frame = 0
             if end_frame is None:
@@ -325,7 +326,13 @@ class TrackDatabase:
 
             for frame_number in frame_iter:
                 frame = track_node[str(frame_number)][:, :, :]
-                result.append(Frame.from_array(frame, frame_number, flow_clipped=True))
+
+                region = Region.region_from_array(bounds[frame_number])
+                result.append(
+                    Frame.from_array(
+                        frame, frame_number, flow_clipped=True, region=region
+                    )
+                )
         return result
 
     def remove_clip(self, clip_id):

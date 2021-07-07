@@ -80,6 +80,10 @@ def prediction_job(queue, db, model_file):
 def add_predictions(db, clip_id, classifier):
     tracks = db.get_clip_tracks(clip_id)
     clip_meta = db.get_clip_meta(clip_id)
+    crop_region = clip_meta.get("edge_pixels", 0)
+    res_x = clip_meta.get("res_x", 160)
+    res_y = clip_meta.get("res_y", 120)
+    crop_region = Rectangle(edge, edge, res_x - 2 * edge, res_y - 2 * edge)
     overlay = None
     for track in tracks:
         track_data = db.get_track(clip_id, track["id"])
@@ -98,6 +102,7 @@ def add_predictions(db, clip_id, classifier):
             clip_meta["frame_temp_median"][track["start_frame"] : track["frames"]],
             regions,
             overlay,
+            crop_region,
         )
         db.add_prediction(clip_id, track["id"], track_prediction)
 

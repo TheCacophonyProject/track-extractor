@@ -1,7 +1,7 @@
 import cv2
+import enum
 import numpy as np
 import random
-
 from ml_tools import tools
 from track.track import TrackChannels
 from ml_tools import imageprocessing
@@ -12,12 +12,18 @@ from ml_tools import imageprocessing
 MIN_SIZE = 4
 
 
-class FrameTypes:
+class FrameTypes(enum.Enum):
     """Types of frames"""
 
-    thermal_square = 0
-    filtered_square = 1
-    overlay = 2
+    thermal_tiled = 0
+    filtered_tiled = 1
+    flow_tiled = 2
+    overlay = 3
+    flow_rgb = 4
+
+    @staticmethod
+    def is_valid(name):
+        return name in FrameTypes.__members__.keys()
 
 
 def preprocess_segment(
@@ -28,6 +34,8 @@ def preprocess_segment(
     default_inset=2,
     keep_aspect=False,
     frame_size=48,
+    crop_rectangle=None,
+    keep_edge=False,
 ):
     """
     Preprocesses the raw track data, scaling it to correct size, and adjusting to standard levels
@@ -105,10 +113,17 @@ def preprocess_segment(
             crop_region.bottom += 1
             crop_region.crop(frame_bounds)
         frame.crop_by_region(crop_region, out=frame)
-        frame.resize((frame_size, frame_size), keep_aspect=keep_aspect)
+        frame.resize(
+            (frame_size, frame_size),
+            keep_aspect=keep_aspect,
+            keep_edge=keep_edge,
+            crop_rectangle=crop_rectangle,
+        )
         if reference_level is not None:
             frame.thermal -= reference_level[i]
             np.clip(frame.thermal, a_min=0, a_max=None, out=frame.thermal)
+        frame.unclip_flow()
+        frame.normalize()
         if augment:
             if level_adjust is not None:
                 frame.thermal += level_adjust
@@ -152,13 +167,16 @@ def preprocess_movement(
     frames_per_row,
     frame_size,
     regions,
-    red_channel,
+    red_type,
+    green_type,
+    blue_type,
     preprocess_fn=None,
     augment=False,
-    green_type=None,
     keep_aspect=False,
     reference_level=None,
     overlay=None,
+    crop_rectangle=None,
+    keep_edge=False,
 ):
     segment, flipped = preprocess_segment(
         segment,
@@ -167,58 +185,57 @@ def preprocess_movement(
         default_inset=0,
         keep_aspect=keep_aspect,
         frame_size=frame_size,
+        crop_rectangle=crop_rectangle,
+        keep_edge=keep_edge,
     )
+    frame_types = {}
+    channel_types = set([green_type, blue_type, red_type])
+    for type in channel_types:
+        if type == FrameTypes.overlay:
+            if overlay is None:
+                overlay = imageprocessing.overlay_image(
+                    data,
+                    regions,
+                    dim=(frames_per_row * frame_size, frames_per_row * frame_size),
+                    require_movement=True,
+                )
+                channel_data, stats = imageprocessing.normalize(overlay, min=0)
+                if not stats[0]:
+                    return None
+            else:
+                channel_data = np.zeros((square.shape[0], square.shape[1]))
+                channel_data[: overlay.shape[0], : overlay.shape[1]] = overlay
 
-    red_segment = [frame.get_channel(red_channel) for frame in segment]
-    # as long as one frame it's fine
-    red_square, success = imageprocessing.square_clip(
-        red_segment, frames_per_row, (frame_size, frame_size), type
+            if flipped:
+                channel_data = np.flip(channel_data, axis=1)
+        elif type == FrameTypes.flow_tiled:
+            channel_segment = [
+                frame.get_channel(TrackChannels.flow) for frame in segment
+            ]
+            channel_data, success = imageprocessing.square_clip_flow(
+                channel_segment, frames_per_row, (frame_size, frame_size)
+            )
+            if not success:
+                return None
+        else:
+            if type == FrameTypes.thermal_tiled:
+                channel = TrackChannels.thermal
+            else:
+                channel = TrackChannels.filtered
+
+            channel_segment = [frame.get_channel(channel) for frame in segment]
+            channel_data, success = imageprocessing.square_clip(
+                channel_segment, frames_per_row, (frame_size, frame_size)
+            )
+
+            if not success:
+                return None
+
+        frame_types[type] = channel_data
+
+    data = np.stack(
+        (frame_types[red_type], frame_types[green_type], frame_types[blue_type]), axis=2
     )
-
-    if not success:
-        return None
-
-    if overlay is None:
-        overlay = imageprocessing.overlay_image(
-            data,
-            regions,
-            dim=red_square.shape,
-            require_movement=True,
-        )
-        overlay, stats = imageprocessing.normalize(overlay, min=0)
-        if not stats[0]:
-            return None
-    else:
-        full_overlay = np.zeros((square.shape[0], square.shape[1]))
-        full_overlay[: overlay.shape[0], : overlay.shape[1]] = overlay
-        overlay = full_overlay
-    if flipped:
-        overlay = np.flip(overlay, axis=1)
-
-    data = np.empty((red_square.shape[0], red_square.shape[1], 3))
-    data[:, :, 0] = red_square
-    if green_type == FrameTypes.filtered_square:
-        green_segment = [frame.get_channel(TrackChannels.filtered) for frame in segment]
-        green_square, success = imageprocessing.square_clip(
-            green_segment, frames_per_row, (frame_size, frame_size), type
-        )
-
-        if not success:
-            return None
-    elif green_type == FrameTypes.thermal_square:
-        green_segment = [frame.get_channel(TrackChannels.thermal) for frame in segment]
-        green_square, success = imageprocessing.square_clip(
-            green_segment, frames_per_row, (frame_size, frame_size), type
-        )
-        if not success:
-            return None
-    elif green_type == FrameTypes.overlay:
-        green_square = overlay
-    else:
-        green_square = np.zeros(overlay.shape)
-
-    data[:, :, 1] = green_square
-    data[:, :, 2] = overlay  # overlay
 
     if preprocess_fn:
         data = data * 255

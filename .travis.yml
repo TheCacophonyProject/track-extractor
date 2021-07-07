@@ -1,3 +1,4 @@
+# require the branch name to be master (note for PRs this is the base branch name)
 dist: bionic
 language: python
 python:
@@ -23,10 +24,10 @@ script:
 - sudo chmod -R 777 /var/spool/cptv
 - |
   python -c "import gdown
-  gdown.download(\"https://drive.google.com/u/1/uc?id=1F55gbIjmil1hOV4kuW2rSZFA3RB69qez\", \"model_hq.tar\", quiet=False)"
+  gdown.download(\"https://drive.google.com/u/1/uc?id=1CQoQLYbfX9NzRo2_BlpNE_I3c0iG6ZFd\", \"model_hq.tar\", quiet=False)"
 - mkdir model
 - tar -C model -xvf model_hq.tar
-- python3 classify.py all -c tests/test-config.yaml -m model/training-best.sav
+- python3 classify.py all -c tests/test-config.yaml -m model/val_acc/saved_model.pb
 # to be done
 # - python3 piclassify.py --cptv tests/clips/hedgehog.cptv  --thermal-config-file tests/config.toml -c tests/test-config.yaml
 
